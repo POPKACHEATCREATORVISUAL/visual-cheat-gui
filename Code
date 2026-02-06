@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Cheat Client App</title>
+<style>
+body {
+    margin:0;
+    background: radial-gradient(circle at top, #0a0a0a, #050505);
+    font-family:"Segoe UI", Arial;
+    color:#fff;
+    height:100vh;
+    overflow:hidden;
+}
+
+/* MAIN WINDOW */
+.cheat {
+    position: absolute;
+    top:50px;
+    left:50px;
+    width:720px;
+    height:520px;
+    background: rgba(15,15,15,.9);
+    backdrop-filter: blur(14px);
+    border-radius:14px;
+    box-shadow:0 0 40px #00ff9950;
+    display:flex;
+    flex-direction:row;
+    user-select:none;
+    overflow:hidden;
+}
+
+/* RESIZE HANDLE */
+.resizer {
+    width:12px;
+    height:12px;
+    background:#00ff99;
+    position:absolute;
+    right:2px;
+    bottom:2px;
+    cursor:se-resize;
+    border-radius:3px;
+}
+
+/* TABS */
+.tabs {
+    width:180px;
+    background: rgba(10,10,10,.95);
+    border-right: 1px solid #00ff9930;
+}
+.tab {
+    padding:16px;
+    cursor:pointer;
+    color:#888;
+    transition:.25s;
+}
+.tab:hover {background:#111;color:#fff;}
+.tab.active {
+    color:#00ff99;
+    background:linear-gradient(90deg,#00ff9930,transparent);
+    box-shadow: inset 3px 0 0 #00ff99;
+}
+
+/* CONTENT */
+.content {
+    flex:1;
+    padding:18px;
+    display:none;
+    animation:fade .25s ease;
+    overflow-y:auto;
+}
+.content.active { display:block; }
+@keyframes fade {
+    from { opacity:0; transform:translateX(10px);}
+    to { opacity:1; transform:translateX(0);}
+}
+
+/* SEARCH */
+.search { margin-bottom:12px; }
+.search input {
+    width:100%;
+    background:#050505;
+    border:1px solid #ffffff20;
+    padding:8px;
+    border-radius:6px;
+    color:#fff;
+}
+
+/* SECTION */
+.section { font-size:13px; color:#00ff99; margin-bottom:8px; border-left:3px solid #00ff99; padding-left:8px; }
+
+/* OPTION */
+.option { display:flex; justify-content:space-between; align-items:center; margin:10px 0; }
+
+/* SWITCH */
+.switch { position:relative; width:46px; height:22px; }
+.switch input{ display:none; }
+.slider{
+    position:absolute; inset:0; background:#333; border-radius:20px; transition:.25s;
+}
+.slider::before{
+    content:""; position:absolute; width:16px; height:16px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.25s;
+}
+input:checked + .slider { background:#00ff99; box-shadow:0 0 10px #00ff99; }
+input:checked + .slider::before { transform:translateX(22px); }
+
+/* RANGE */
+.range{ width:170px; } 
+.range input{ width:100%; } 
+.value{ font-size:12px; color:#aaa; }
+
+/* KEYBINDS */
+.bind{ font-size:12px; color:#aaa; border:1px solid #ffffff20; padding:4px 8px; border-radius:6px; }
+.bind-btn{ background:#111; border:1px solid #00ff9930; color:#00ff99; padding:4px 8px; border-radius:6px; cursor:pointer; }
+.bind-btn:hover{ background:#00ff9920; }
+
+/* CONFIG */
+.config-list{ height:160px; background:#050505; border:1px solid #ffffff15; overflow-y:auto; }
+.config-item{ padding:8px; cursor:pointer; color:#aaa; }
+.config-item.active{ background:#00ff9920; color:#00ff99; }
+</style>
+</head>
+<body>
+
+<div class="cheat" id="cheatApp">
+
+<!-- TABS -->
+<div class="tabs">
+    <div class="tab active" onclick="openTab('combat',this)">Combat</div>
+    <div class="tab" onclick="openTab('movement',this)">Movement</div>
+    <div class="tab" onclick="openTab('visuals',this)">Visuals</div>
+    <div class="tab" onclick="openTab('keybinds',this)">Keybinds</div>
+    <div class="tab" onclick="openTab('config',this)">Configs</div>
+</div>
+
+<!-- COMBAT -->
+<div class="content active" id="combat">
+    <div class="search"><input type="text" placeholder="Search..." oninput="search(this)"></div>
+    <div class="section">Combat</div>
+    <div class="option"><span>KillAura</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+    <div class="option"><span>Range</span><div class="range"><input type="range" min="3" max="6" value="4" oninput="v(this,'r')"></div><span class="value" id="r">4</span></div>
+    <div class="option"><span>CPS</span><div class="range"><input type="range" min="5" max="20" value="10" oninput="v(this,'c')"></div><span class="value" id="c">10</span></div>
+</div>
+
+<!-- MOVEMENT -->
+<div class="content" id="movement">
+    <div class="section">Movement</div>
+    <div class="option"><span>Fly</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+    <div class="option"><span>Speed</span><div class="range"><input type="range" min="1" max="5" value="2" oninput="v(this,'s')"></div><span class="value" id="s">2</span></div>
+</div>
+
+<!-- VISUALS -->
+<div class="content" id="visuals">
+    <div class="section">Visuals</div>
+    <div class="option"><span>X-Ray</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+    <div class="option"><span>All Invisible</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+</div>
+
+<!-- KEYBINDS -->
+<div class="content" id="keybinds">
+    <div class="section">Keybinds</div>
+    <div class="option"><span>KillAura</span><span class="bind">R</span><button class="bind-btn">Bind</button></div>
+    <div class="option"><span>Fly</span><span class="bind">F</span><button class="bind-btn">Bind</button></div>
+    <div class="option"><span>X-Ray</span><span class="bind">X</span><button class="bind-btn">Bind</button></div>
+</div>
+
+<!-- CONFIG -->
+<div class="content" id="config">
+    <div class="section">Configs</div>
+    <div class="config-list">
+        <div class="config-item active">Legit</div>
+        <div class="config-item">Rage</div>
+        <div class="config-item">HVH</div>
+        <div class="config-item">Test</div>
+    </div>
+</div>
+
+<div class="resizer" id="resizer"></div>
+</div>
+
+<script>
+// TABS
+function openTab(id,el){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById(id).classList.add('active');
+}
+
+// SLIDER VALUE
+function v(sl,id){ document.getElementById(id).innerText = sl.value; }
+
+// SEARCH
+function search(input){
+    let q=input.value.toLowerCase();
+    document.querySelectorAll('.option span:first-child').forEach(s=>{
+        s.parentElement.style.display=s.innerText.toLowerCase().includes(q)?"flex":"none";
+    });
+}
+
+// DRAGGABLE
+const cheat = document.getElementById('cheatApp');
+let isDragging = false, offsetX, offsetY;
+cheat.addEventListener('mousedown', e => {
+    if(e.target.classList.contains('tab') || e.target.classList.contains('switch') || e.target.tagName==='INPUT') return;
+    isDragging = true;
+    offsetX = e.clientX - cheat.offsetLeft;
+    offsetY = e.clientY - cheat.offsetTop;
+});
+document.addEventListener('mouseup', ()=>isDragging=false);
+document.addEventListener('mousemove', e=>{
+    if(isDragging){
+        cheat.style.left = (e.clientX-offsetX)+'px';
+        cheat.style.top = (e.clientY-offsetY)+'px';
+    }
+});
+
+// RESIZABLE
+const resizer = document.getElementById('resizer');
+let isResizing = false;
+resizer.addEventListener('mousedown', e=>{
+    isResizing=true;
+});
+document.addEventListener('mouseup', e=>isResizing=false);
+document.addEventListener('mousemove', e=>{
+    if(isResizing){
+        cheat.style.width = (e.clientX - cheat.offsetLeft)+'px';
+        cheat.style.height = (e.clientY - cheat.offsetTop)+'px';
+    }
+});
+</script>
+
+</body>
+</html>
